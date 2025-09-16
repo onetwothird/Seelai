@@ -801,6 +801,7 @@ class _SignupPageState extends State<SignupPage>
     );
   }
 
+
   void _showLoadingDialog() {
     showDialog(
       context: context,
