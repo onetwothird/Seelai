@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'auth/theme.dart';
 import 'auth/login_page.dart';
 
 void main() {
@@ -12,26 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Authentication App',
+      title: AuthTheme.appTitle,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-        useMaterial3: true,
-        fontFamily: 'SF Pro Display', // You can change this to your preferred font
-      ),
+      theme: AuthTheme.theme,
       home: const LoginPage(),
-      // Optional: Set system UI overlay style
       builder: (context, child) {
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.dark,
-            statusBarBrightness: Brightness.light,
-            systemNavigationBarColor: Colors.white,
-            systemNavigationBarIconBrightness: Brightness.dark,
-          ),
-          child: child!,
-        );
+        return AuthTheme.wrapWithSystemUI(child: child!);
       },
     );
   }
