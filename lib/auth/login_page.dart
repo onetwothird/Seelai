@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signup_page.dart';  
+import '../roles/user/home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -714,7 +715,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   
-  void _handleLogin() {
+    void _handleLogin() {
     if (_formKey.currentState?.validate() ?? false) {
       _showLoadingDialog();
       
@@ -729,7 +730,7 @@ class _LoginPageState extends State<LoginPage>
                 const SizedBox(width: 12),
                 Text(
                   'Welcome back! Login successful',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: TextStyle(fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -740,9 +741,17 @@ class _LoginPageState extends State<LoginPage>
             duration: const Duration(seconds: 3),
           ),
         );
+
+        Future.delayed(const Duration(milliseconds: 800), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        });
       });
     }
   }
+
 
   void _handleSocialLogin(String provider) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -834,3 +843,4 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 }
+  
