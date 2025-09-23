@@ -752,7 +752,6 @@ class _LoginPageState extends State<LoginPage>
     }
   }
 
-
   void _handleSocialLogin(String provider) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
