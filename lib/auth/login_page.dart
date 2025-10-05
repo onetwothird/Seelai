@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'signup_page.dart';  
-import '../roles/user/home.dart';
+import '../roles/user/home_screen.dart';
+
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  final VoidCallback onThemeToggle;
+  
+  const LoginPage({Key? key, required this.onThemeToggle}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -94,6 +97,7 @@ class _LoginPageState extends State<LoginPage>
     setState(() {
       _isDarkMode = !_isDarkMode;
     });
+    widget.onThemeToggle(); // Call the app-level theme toggle
   }
 
   void _navigateToSignUp() {
@@ -336,7 +340,7 @@ class _LoginPageState extends State<LoginPage>
                   ],
                 ),
                 child: const Icon(
-                  Icons.security_rounded,
+                  Icons.visibility_rounded,
                   color: Colors.white,
                   size: 50,
                 ),
@@ -355,7 +359,7 @@ class _LoginPageState extends State<LoginPage>
             ),
             const SizedBox(height: 12),
             Text(
-              'Sign in to continue your journey',
+              'Sign in to Seelai',
               style: TextStyle(
                 fontSize: 16,
                 color: _textSecondaryColor,
@@ -679,7 +683,7 @@ class _LoginPageState extends State<LoginPage>
     required String label,
     required VoidCallback onPressed,
   }) {
-    return Container(
+    return SizedBox(
       height: 56,
       child: OutlinedButton(
         onPressed: onPressed,
@@ -714,51 +718,57 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  
-    void _handleLogin() {
+  Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
       _showLoadingDialog();
       
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.of(context).pop();
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Text(
-                  'Welcome back! Login successful',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-            backgroundColor: _accentColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            margin: const EdgeInsets.all(16),
-            duration: const Duration(seconds: 3),
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: const [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 12),
+              Text(
+                'Welcome back! Login successful',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
-        );
+          backgroundColor: _accentColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
+        ),
+      );
 
-        Future.delayed(const Duration(milliseconds: 800), () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        });
-      });
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (!mounted) return;
+      
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BlindFriendlyHomeScreen(
+            onThemeToggle: widget.onThemeToggle, 
+          ),
+        ),
+      );
     }
   }
-
 
   void _handleSocialLogin(String provider) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.info_outline, color: Colors.white),
+            const Icon(Icons.info_outline, color: Colors.white),
             const SizedBox(width: 12),
             Text(
               'Continue with $provider',
@@ -803,44 +813,47 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  void _showForgotPasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: _surfaceColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Reset Password',
-          style: TextStyle(color: _textPrimaryColor),
-        ),
-        content: Text(
-          'Enter your email address and we\'ll send you a link to reset your password.',
-          style: TextStyle(color: _textSecondaryColor),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: _textSecondaryColor)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Password reset link sent!'),
-                  backgroundColor: _accentColor,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  margin: const EdgeInsets.all(16),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: _primaryColor),
-            child: const Text('Send Link'),
-          ),
-        ],
+void _showForgotPasswordDialog() {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: _surfaceColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(
+        'Reset Password',
+        style: TextStyle(color: _textPrimaryColor),
       ),
-    );
-  }
+      content: Text(
+        'Enter your email address and we\'ll send you a link to reset your password.',
+        style: TextStyle(color: _textSecondaryColor),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel', style: TextStyle(color: _textSecondaryColor)),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+            
+            // Add mounted check here
+            if (!mounted) return;
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Password reset link sent!'),
+                backgroundColor: _accentColor,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                margin: const EdgeInsets.all(16),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: _primaryColor),
+          child: const Text('Send Link'),
+        ),
+      ],
+    ),
+  );
 }
-  
+}
