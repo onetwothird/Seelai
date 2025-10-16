@@ -81,10 +81,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
           ),
 
           // Background decorative images - FIXED POSITIONING
-          // Top Left - bg_shape_1.png
+          // bottom right- bg_shape_1.png
           Positioned(
-            top: 0,
-            left: 0,
+            bottom:  -40,
+            right: -30,
             child: Opacity(
               opacity: 0.3,
               child: Image.asset(
@@ -96,24 +96,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             ),
           ),
           
-          // Top Right - bg_shape_2.png
+          // top left - bg_shape_3.png
           Positioned(
-            top: 0,
-            right: 2,
-            child: Opacity(
-              opacity: 0.25,
-              child: Image.asset(
-                'assets/images/bg_shape_2.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          
-          // Bottom Left - bg_shape_3.png
-          Positioned(
-            bottom: 0,
+            top: -100,
             left: 0,
             child: Opacity(
               opacity: 0.2,
@@ -126,20 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             ),
           ),
           
-          // Bottom Right - bg_shape_4.png
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Opacity(
-              opacity: 0.15,
-              child: Image.asset(
-                'assets/images/bg_shape_4.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+        
 
           // Animated decorative circles
           Positioned(
