@@ -74,13 +74,11 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             ),
           ),
 
-          // Background decorative images - FIXED POSITIONING
-          // Top Left - bg_shape_1.png
-          Positioned(
-            top: 0,
-            left: 0,
+   Positioned(
+            bottom:  -40,
+            right: -30,
             child: Opacity(
-              opacity: 0.25,
+              opacity: 0.3,
               child: Image.asset(
                 'assets/images/bg_shape_1.png',
                 width: screenWidth * 0.5,
@@ -90,44 +88,14 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             ),
           ),
           
-          // Top Right - bg_shape_2.png
+          // top left - bg_shape_3.png
           Positioned(
-            top: 0,
-            right: 0,
-            child: Opacity(
-              opacity: 0.2,
-              child: Image.asset(
-                'assets/images/bg_shape_2.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          
-          // Bottom Left - bg_shape_3.png
-          Positioned(
-            bottom: 0,
+            top: -100,
             left: 0,
             child: Opacity(
               opacity: 0.2,
               child: Image.asset(
                 'assets/images/bg_shape_3.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          
-          // Bottom Right - bg_shape_4.png
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Opacity(
-              opacity: 0.15,
-              child: Image.asset(
-                'assets/images/bg_shape_4.png',
                 width: screenWidth * 0.5,
                 height: screenWidth * 0.5,
                 fit: BoxFit.cover,
