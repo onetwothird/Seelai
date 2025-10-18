@@ -17,28 +17,34 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   late Animation<Offset> _slideAnimation;
   late Animation<double> _floatAnimation;
 
+  String _selectedRole = 'visually_impaired';
+  bool _obscurePassword = true;
+  
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _fadeController = AnimationController(
-      duration: Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 800),
       vsync: this,
     );
     _floatController = AnimationController(
-      duration: Duration(milliseconds: 2000),
+      duration: Duration(milliseconds: 2500),
       vsync: this,
     )..repeat(reverse: true);
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: Offset(0, 0.1),
+      begin: Offset(0, 0.15),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic));
 
-    _floatAnimation = Tween<double>(begin: -8, end: 8).animate(
+    _floatAnimation = Tween<double>(begin: -10, end: 10).animate(
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
 
@@ -49,6 +55,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   void dispose() {
     _fadeController.dispose();
     _floatController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -60,26 +68,28 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient background
+          // 1. Gradient background (back layer)
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFFF0F4FF),
-                  Color(0xFFFFF0F8),
-                  Color(0xFFF0F9FF),
+                  Color(0xFFFAF5FF),
+                  Color(0xFFFFF1F2),
+                  Color(0xFFF0FDFA),
                 ],
+                stops: [0.0, 0.5, 1.0],
               ),
             ),
           ),
 
-   Positioned(
-            bottom:  -40,
+          // 2. Background decorative elements (back layer)
+          Positioned(
+            bottom: -40,
             right: -30,
             child: Opacity(
-              opacity: 0.3,
+              opacity: 1,
               child: Image.asset(
                 'assets/images/bg_shape_1.png',
                 width: screenWidth * 0.5,
@@ -88,13 +98,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
           ),
-          
-          // top left - bg_shape_3.png
-          Positioned(
-            top: -100,
-            left: 0,
+  Positioned(
+            top: -150,
+            left: -30,
             child: Opacity(
-              opacity: 0.2,
+              opacity: 1,
               child: Image.asset(
                 'assets/images/bg_shape_3.png',
                 width: screenWidth * 0.5,
@@ -103,43 +111,27 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
           ),
-
-          // Animated floating circles
+         // Background decorative images
           Positioned(
-            top: screenHeight * 0.12,
-            right: screenWidth * 0.1,
-            child: AnimatedBuilder(
-              animation: _floatAnimation,
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: Offset(0, _floatAnimation.value),
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [accent.withOpacity(0.3), Color(0xFF3B82F6).withOpacity(0.3)],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accent.withOpacity(0.2),
-                          blurRadius: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+            bottom: -100,
+            right: -60,
+            child: Opacity(
+              opacity: 1,
+              child: Image.asset(
+                'assets/images/bg_shape_1.png',
+                width: screenWidth * 0.5,
+                height: screenWidth * 0.5,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
 
-          // Scrollable content
+          // 4. Main content (front layer)
           SafeArea(
             child: SingleChildScrollView(
               physics: BouncingScrollPhysics(),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: SlideTransition(
@@ -147,35 +139,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: screenHeight * 0.06),
-
-                        // App icon
-                        Container(
-                          padding: EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [primary, secondary],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primary.withOpacity(0.4),
-                                blurRadius: 30,
-                                offset: Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Image.asset(
-                            'assets/icons/logo.png',
-                            width: 50,
-                            height: 50,
-                            color: white,
-                          ),
-                        ),
-
-                        SizedBox(height: screenHeight * 0.03),
+                        SizedBox(height: screenHeight * 0.07),
 
                         // Header
                         ShaderMask(
@@ -183,30 +147,81 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           child: Text(
                             "Welcome Back",
                             style: h1.copyWith(
-                              fontSize: screenWidth * 0.09,
+                              fontSize: screenWidth * 0.095,
                               color: white,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -1.0,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.01),
+                        SizedBox(height: screenHeight * 0.015),
                         Text(
                           "Sign in to continue your journey",
                           style: body.copyWith(
-                            fontSize: screenWidth * 0.042,
+                            fontSize: screenWidth * 0.044,
+                            color: grey,
+                            fontWeight: FontWeight.w500,
                           ),
                           textAlign: TextAlign.center,
                         ),
 
                         SizedBox(height: screenHeight * 0.05),
 
-                        // Enhanced Text Fields with icons
+                        // Role Selection
+                        Text(
+                          "Select Your Role",
+                          style: bodyBold.copyWith(
+                            fontSize: screenWidth * 0.042,
+                            color: black,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.025),
+
+                        // Role Cards
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildRoleCard(
+                                role: 'visually_impaired',
+                                icon: Icons.remove_red_eye_rounded,
+                                label: 'User',
+                                screenWidth: screenWidth,
+                              ),
+                            ),
+                            SizedBox(width: 14),
+                            Expanded(
+                              child: _buildRoleCard(
+                                role: 'caretaker',
+                                icon: Icons.favorite_rounded,
+                                label: 'Caretaker',
+                                screenWidth: screenWidth,
+                              ),
+                            ),
+                            SizedBox(width: 14),
+                            Expanded(
+                              child: _buildRoleCard(
+                                role: 'admin',
+                                icon: Icons.admin_panel_settings_rounded,
+                                label: 'MSDWD',
+                                screenWidth: screenWidth,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: screenHeight * 0.045),
+
+                        // Email Field
                         Container(
                           decoration: BoxDecoration(
                             boxShadow: softShadow,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(radiusLarge),
                           ),
                           child: TextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
                             style: body.copyWith(
                               fontSize: 16,
                               color: black,
@@ -217,43 +232,45 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                               filled: true,
                               hintText: 'Email address',
                               hintStyle: body.copyWith(
-                                color: grey.withOpacity(0.5),
+                                color: greyLight.withOpacity(0.7),
                                 fontWeight: FontWeight.w400,
                               ),
                               prefixIcon: Container(
-                                padding: EdgeInsets.all(12),
+                                padding: EdgeInsets.all(14),
                                 child: Icon(
-                                  Icons.email_outlined,
+                                  Icons.email_rounded,
                                   color: primary,
                                   size: 24,
                                 ),
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 22, vertical: 22),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: lightBlue, width: 1.5),
+                                borderRadius: BorderRadius.circular(radiusLarge),
+                                borderSide: BorderSide(color: greyLighter, width: 1.5),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: lightBlue, width: 1.5),
+                                borderRadius: BorderRadius.circular(radiusLarge),
+                                borderSide: BorderSide(color: greyLighter, width: 1.5),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: primary, width: 2),
+                                borderRadius: BorderRadius.circular(radiusLarge),
+                                borderSide: BorderSide(color: primary, width: 2.5),
                               ),
                             ),
                           ),
                         ),
 
-                        SizedBox(height: screenHeight * 0.02),
+                        SizedBox(height: screenHeight * 0.025),
 
+                        // Password Field
                         Container(
                           decoration: BoxDecoration(
                             boxShadow: softShadow,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(radiusLarge),
                           ),
                           child: TextField(
-                            obscureText: true,
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
                             style: body.copyWith(
                               fontSize: 16,
                               color: black,
@@ -264,72 +281,83 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                               filled: true,
                               hintText: 'Password',
                               hintStyle: body.copyWith(
-                                color: grey.withOpacity(0.5),
+                                color: greyLight.withOpacity(0.7),
                                 fontWeight: FontWeight.w400,
                               ),
                               prefixIcon: Container(
-                                padding: EdgeInsets.all(12),
+                                padding: EdgeInsets.all(14),
                                 child: Icon(
-                                  Icons.lock_outline,
+                                  Icons.lock_rounded,
                                   color: primary,
                                   size: 24,
                                 ),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  Icons.visibility_off_outlined,
-                                  color: grey,
+                                  _obscurePassword
+                                      ? Icons.visibility_off_rounded
+                                      : Icons.visibility_rounded,
+                                  color: greyLight,
                                   size: 22,
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 22, vertical: 22),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: lightBlue, width: 1.5),
+                                borderRadius: BorderRadius.circular(radiusLarge),
+                                borderSide: BorderSide(color: greyLighter, width: 1.5),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: lightBlue, width: 1.5),
+                                borderRadius: BorderRadius.circular(radiusLarge),
+                                borderSide: BorderSide(color: greyLighter, width: 1.5),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: primary, width: 2),
+                                borderRadius: BorderRadius.circular(radiusLarge),
+                                borderSide: BorderSide(color: primary, width: 2.5),
                               ),
                             ),
                           ),
                         ),
 
-                        SizedBox(height: screenHeight * 0.015),
+                        SizedBox(height: screenHeight * 0.02),
 
                         // Forgot Password
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              // TODO: Implement forgot password
+                            },
                             style: TextButton.styleFrom(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                             ),
                             child: Text(
                               "Forgot password?",
                               style: bodyBold.copyWith(
-                                fontSize: screenWidth * 0.038,
+                                fontSize: screenWidth * 0.04,
                                 color: primary,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ),
 
-                        SizedBox(height: screenHeight * 0.03),
+                        SizedBox(height: screenHeight * 0.035),
 
                         // Login Button
                         CustomButton(
                           text: "Sign In",
-                          onPressed: () {},
+                          onPressed: () {
+                            _handleLogin();
+                          },
                           isLarge: true,
                         ),
 
-                        SizedBox(height: screenHeight * 0.03),
+                        SizedBox(height: screenHeight * 0.035),
 
                         // Create account text
                         Center(
@@ -347,14 +375,15 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             ),
                             child: RichText(
                               text: TextSpan(
-                                style: body.copyWith(fontSize: screenWidth * 0.04),
+                                style: body.copyWith(fontSize: screenWidth * 0.042),
                                 children: [
                                   TextSpan(text: "Don't have an account? "),
                                   TextSpan(
                                     text: "Sign Up",
                                     style: bodyBold.copyWith(
-                                      fontSize: screenWidth * 0.04,
+                                      fontSize: screenWidth * 0.042,
                                       color: primary,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ],
@@ -363,40 +392,41 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           ),
                         ),
 
-                        SizedBox(height: screenHeight * 0.03),
+                        SizedBox(height: screenHeight * 0.035),
 
                         // Divider with text
                         Row(
                           children: [
                             Expanded(
                               child: Container(
-                                height: 1.5,
+                                height: 1,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
                                       Colors.transparent,
-                                      grey.withOpacity(0.3),
+                                      greyLighter,
                                     ],
                                   ),
                                 ),
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              padding: EdgeInsets.symmetric(horizontal: 18),
                               child: Text(
                                 "Or continue with",
                                 style: caption.copyWith(
                                   fontWeight: FontWeight.w600,
+                                  color: greyLight,
                                 ),
                               ),
                             ),
                             Expanded(
                               child: Container(
-                                height: 1.5,
+                                height: 1,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      grey.withOpacity(0.3),
+                                      greyLighter,
                                       Colors.transparent,
                                     ],
                                   ),
@@ -406,9 +436,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           ],
                         ),
 
-                        SizedBox(height: screenHeight * 0.03),
+                        SizedBox(height: screenHeight * 0.035),
 
-                        // Enhanced Social buttons with actual icons
+                        // Social buttons
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -429,7 +459,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           ],
                         ),
 
-                        SizedBox(height: screenHeight * 0.05),
+                        SizedBox(height: screenHeight * 0.06),
                       ],
                     ),
                   ),
@@ -442,18 +472,88 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
+  Widget _buildRoleCard({
+    required String role,
+    required IconData icon,
+    required String label,
+    required double screenWidth,
+  }) {
+    final isSelected = _selectedRole == role;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedRole = role;
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 350),
+        curve: Curves.easeInOutCubic,
+        padding: EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+        decoration: BoxDecoration(
+          gradient: isSelected 
+              ? primaryGradient 
+              : LinearGradient(colors: [white, white]),
+          borderRadius: BorderRadius.circular(radiusLarge),
+          border: Border.all(
+            color: isSelected ? primary.withOpacity(0.3) : greyLighter,
+            width: isSelected ? 2 : 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: primary.withOpacity(0.35),
+                    blurRadius: 20,
+                    offset: Offset(0, 8),
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: secondary.withOpacity(0.2),
+                    blurRadius: 30,
+                    offset: Offset(0, 12),
+                    spreadRadius: -4,
+                  ),
+                ]
+              : softShadow,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? white : primary,
+              size: 30,
+            ),
+            SizedBox(height: 10),
+            Text(
+              label,
+              style: caption.copyWith(
+                fontSize: screenWidth * 0.034,
+                color: isSelected ? white : black,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSocialButton(String assetPath, Color brandColor) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        // TODO: Implement social login
+      },
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
-        height: 65,
-        width: 95,
+        duration: Duration(milliseconds: 250),
+        height: 68,
+        width: 100,
         decoration: BoxDecoration(
           color: white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(radiusLarge),
           border: Border.all(
-            color: lightBlue,
+            color: greyLighter,
             width: 1.5,
           ),
           boxShadow: softShadow,
@@ -461,11 +561,50 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         child: Center(
           child: Image.asset(
             assetPath,
-            width: 35,
-            height: 35,
+            width: 36,
+            height: 36,
           ),
         ),
       ),
     );
+  }
+
+  void _handleLogin() {
+    // Validate fields
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: error,
+        ),
+      );
+      return;
+    }
+
+    // Basic email validation
+    if (!_emailController.text.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a valid email address'),
+          backgroundColor: error,
+        ),
+      );
+      return;
+    }
+
+    // TODO: Implement actual login logic with backend
+    debugPrint('Logging in as: $_selectedRole');
+    debugPrint('Email: ${_emailController.text}');
+    
+    // Show success message (temporary)
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Login successful! Role: $_selectedRole'),
+        backgroundColor: success,
+      ),
+    );
+
+    // Navigate to appropriate screen based on role after successful login
+    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
   }
 }
