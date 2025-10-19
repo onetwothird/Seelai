@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:seelai/screens/onboarding_screen.dart';
+import 'package:seelai/mobile/auth_layout.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MainApp());
 }
 
@@ -11,7 +17,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: OnboardingScreen(),
+      debugShowCheckedModeBanner: false, // Optional: removes debug banner
+      home: AuthLayout(), // Changed from OnboardingScreen to AuthLayout
     );
   }
 }
