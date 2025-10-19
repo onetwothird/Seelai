@@ -81,67 +81,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
             ),
           ),
 
-          // Decorative circles with blur effect
           Positioned(
-            top: -100,
-            left: -80,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    primary.withOpacity(0.15),
-                    primary.withOpacity(0.0),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          Positioned(
-            bottom: -120,
-            right: -60,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    secondary.withOpacity(0.12),
-                    secondary.withOpacity(0.0),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-
-          Positioned(
-            top: -150,
+            top: -90,
             left: -30,
             child: Opacity(
-              opacity: 1,
+              opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_3.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
+                width: 200, // Fixed width
+                height: 200, // Fixed height
                 fit: BoxFit.cover,
               ),
             ),
           ),
-         // Background decorative images
+
+          // Background decorative images - Bottom Right
           Positioned(
-            bottom: -100,
+            bottom: -60,
             right: -60,
             child: Opacity(
-              opacity: 1,
+              opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_1.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
+                width: 200, // Fixed width
+                height: 200, // Fixed height
                 fit: BoxFit.cover,
               ),
             ),
@@ -152,7 +115,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
               child: Column(
                 children: [
-                  SizedBox(height: screenHeight * 0.1),
+                  SizedBox(height: screenHeight * 0.07),
 
                   // Logo with enhanced animations
                   ScaleTransition(
@@ -180,17 +143,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                               child: Container(
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primary.withOpacity(0.2),
-                                      blurRadius: 50,
-                                      offset: Offset(0, 20),
-                                      spreadRadius: -5,
-                                    ),
-                                  ],
                                 ),
                                 child: Image.asset(
-                                  'assets/icons/logo.png',
+                                  'assets/icons/eye_scanner.png',
                                   fit: BoxFit.contain,
                                 ),
                               ),
