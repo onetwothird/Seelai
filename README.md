@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/onetwothird/Seelai/main/assets/preview.png" alt="Seelai App Preview" width="600"/>
+  <img src="https://raw.githubusercontent.com/onetwothird/Seelai/main/assets/images/preview.png" alt="Seelai App Preview" width="600"/>
 </p>
 
 <h1 align="center">👁️‍🗨️ Seelai: A Mobile Assistant for Visually Impaired Individuals</h1>
