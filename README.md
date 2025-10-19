@@ -1,9 +1,5 @@
 <p align="center">
-Image.network(
-  'https://raw.githubusercontent.com/onetwothird/Seelai/main/assets/images/preview.png',
-  width: 600,
-  fit: BoxFit.contain,
-)
+  <img src="https://raw.githubusercontent.com/onetwothird/Seelai/main/assets/images/preview.png" alt="Seelai App Preview" width="600"/>
 </p>
 
 <h1 align="center">👁️‍🗨️ Seelai: A Mobile Assistant for Visually Impaired Individuals</h1>
