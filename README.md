@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/onetwothird/Seelai/main/assets/images/preview.png" alt="Seelai App Preview" width="600"/>
+  <img src="https://raw.githubusercontent.com/onetwothird/Seelai/main/seelai/assets/images/preview.png" alt="Seelai App Preview" width="600;" />
 </p>
 
 <h1 align="center">👁️‍🗨️ Seelai: A Mobile Assistant for Visually Impaired Individuals</h1>
@@ -118,4 +118,4 @@ For questions or feedback, reach out via:
 
 **Random Thirdy (Angelito Decatoria III)**
 
-- 🐙 GitHub: [@RandomThirdy](https://github.com/RandomThirdy)
+- 🐙 GitHub: [@RandomThirdy](https://github.com/onetwothird)
