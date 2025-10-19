@@ -104,29 +104,31 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             ),
           ),
 
-         Positioned(
-            top: -150,
+                 // Background decorative images - Top Left
+          Positioned(
+            top: -90,
             left: -30,
             child: Opacity(
-              opacity: 1,
+              opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_3.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
+                width: 200, // Fixed width
+                height: 200, // Fixed height
                 fit: BoxFit.cover,
               ),
             ),
           ),
-         // Background decorative images
+
+          // Background decorative images - Bottom Right
           Positioned(
-            bottom: -100,
+            bottom: -60,
             right: -60,
             child: Opacity(
-              opacity: 1,
+              opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_1.png',
-                width: screenWidth * 0.5,
-                height: screenWidth * 0.5,
+                width: 200, // Fixed width
+                height: 200, // Fixed height
                 fit: BoxFit.cover,
               ),
             ),
