@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:seelai/themes/constants.dart';
 import 'package:seelai/themes/widgets.dart';
+import 'package:seelai/mobile/auth_service.dart';
+import 'package:seelai/mobile/database_service.dart';
+import 'package:seelai/mobile/loading_overlay.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -16,23 +21,20 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   late Animation<Offset> _slideAnimation;
   late Animation<double> _floatAnimation;
 
-  // Role selection
   String _selectedRole = 'visually_impaired';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
-  // Controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   
-  // Caretaker-specific
   final TextEditingController _relationshipController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   
-  // Admin-specific
   final TextEditingController _employeeIdController = TextEditingController();
   final TextEditingController _departmentController = TextEditingController();
 
@@ -88,7 +90,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Gradient background (back layer)
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -104,7 +105,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             ),
           ),
 
-                 // Background decorative images - Top Left
           Positioned(
             top: -90,
             left: -30,
@@ -112,14 +112,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_3.png',
-                width: 200, // Fixed width
-                height: 200, // Fixed height
+                width: 200,
+                height: 200,
                 fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // Background decorative images - Bottom Right
           Positioned(
             bottom: -60,
             right: -60,
@@ -127,8 +126,8 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_1.png',
-                width: 200, // Fixed width
-                height: 200, // Fixed height
+                width: 200,
+                height: 200,
                 fit: BoxFit.cover,
               ),
             ),
@@ -152,7 +151,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             ),
           ),
 
-          // 4. Main content (front layer)
           SafeArea(
             child: SingleChildScrollView(
               physics: BouncingScrollPhysics(),
@@ -167,7 +165,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                       children: [
                         SizedBox(height: screenHeight * 0.05),
 
-                        // Header
                         ShaderMask(
                           shaderCallback: (bounds) => primaryGradient.createShader(bounds),
                           child: Text(
@@ -190,7 +187,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                         SizedBox(height: screenHeight * 0.03),
 
-                        // Role Selection
                         Text(
                           "I am a...",
                           style: bodyBold.copyWith(
@@ -200,7 +196,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                         ),
                         SizedBox(height: screenHeight * 0.02),
 
-                        // Role Cards
                         Row(
                           children: [
                             Expanded(
@@ -234,7 +229,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                         SizedBox(height: screenHeight * 0.03),
 
-                        // Common Fields
                         _buildTextField(
                           controller: _nameController,
                           hint: 'Full Name',
@@ -262,7 +256,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                           screenHeight: screenHeight,
                         ),
 
-                        // Role-specific fields
                         if (_selectedRole == 'caretaker') ...[
                           SizedBox(height: screenHeight * 0.02),
                           _buildTextField(
@@ -300,7 +293,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                         SizedBox(height: screenHeight * 0.02),
 
-                        // Password Field
                         Container(
                           decoration: BoxDecoration(
                             boxShadow: softShadow,
@@ -309,6 +301,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                           child: TextField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
+                            enabled: !_isLoading,
                             style: body.copyWith(
                               fontSize: 16,
                               color: black,
@@ -363,7 +356,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                         SizedBox(height: screenHeight * 0.02),
 
-                        // Confirm Password Field
                         Container(
                           decoration: BoxDecoration(
                             boxShadow: softShadow,
@@ -372,6 +364,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                           child: TextField(
                             controller: _confirmPasswordController,
                             obscureText: _obscureConfirmPassword,
+                            enabled: !_isLoading,
                             style: body.copyWith(
                               fontSize: 16,
                               color: black,
@@ -426,19 +419,17 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                         SizedBox(height: screenHeight * 0.035),
 
-                        // Register Button
                         CustomButton(
                           text: "Sign Up",
-                          onPressed: _handleSignup,
+                          onPressed: _isLoading ? null : _handleSignup,
                           isLarge: true,
                         ),
 
                         SizedBox(height: screenHeight * 0.025),
 
-                        // Already have account
                         Center(
                           child: TextButton(
-                            onPressed: () {
+                            onPressed: _isLoading ? null : () {
                               Navigator.pop(context);
                             },
                             style: TextButton.styleFrom(
@@ -464,7 +455,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                         SizedBox(height: screenHeight * 0.025),
 
-                        // Divider with text
                         Row(
                           children: [
                             Expanded(
@@ -507,7 +497,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
                         SizedBox(height: screenHeight * 0.025),
 
-                        // Social buttons
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -536,6 +525,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               ),
             ),
           ),
+
+          // Loading Overlay
+          if (_isLoading)
+            LoadingOverlay(
+              message: 'Creating Account',
+              isVisible: _isLoading,
+            ),
         ],
       ),
     );
@@ -550,7 +546,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     final isSelected = _selectedRole == role;
 
     return GestureDetector(
-      onTap: () {
+      onTap: _isLoading ? null : () {
         setState(() {
           _selectedRole = role;
         });
@@ -614,6 +610,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        enabled: !_isLoading,
         style: body.copyWith(
           fontSize: 16,
           color: black,
@@ -655,8 +652,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
   Widget _buildSocialButton(String assetPath, Color brandColor) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Implement social signup
+      onTap: _isLoading ? null : () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Social signup coming soon!'),
+            backgroundColor: primary,
+          ),
+        );
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -687,63 +689,178 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  void _handleSignup() {
-    // Validate fields
-    if (_nameController.text.isEmpty ||
-        _ageController.text.isEmpty ||
-        _emailController.text.isEmpty ||
+  Future<void> _handleSignup() async {
+    // Validation checks
+    if (_nameController.text.trim().isEmpty ||
+        _ageController.text.trim().isEmpty ||
+        _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
-      // Show error
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: error,
+        ),
       );
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+        SnackBar(
+          content: Text('Passwords do not match'),
+          backgroundColor: error,
+        ),
+      );
+      return;
+    }
+
+    if (_passwordController.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password must be at least 6 characters'),
+          backgroundColor: error,
+        ),
+      );
+      return;
+    }
+
+    int? age = int.tryParse(_ageController.text.trim());
+    if (age == null || age < 1 || age > 150) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a valid age'),
+          backgroundColor: error,
+        ),
       );
       return;
     }
 
     // Role-specific validation
     if (_selectedRole == 'caretaker') {
-      if (_phoneController.text.isEmpty || _relationshipController.text.isEmpty) {
+      if (_phoneController.text.trim().isEmpty || 
+          _relationshipController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill in all caretaker information')),
+          SnackBar(
+            content: Text('Please fill in all caretaker information'),
+            backgroundColor: error,
+          ),
         );
         return;
       }
     }
 
     if (_selectedRole == 'admin') {
-      if (_employeeIdController.text.isEmpty || _departmentController.text.isEmpty) {
+      if (_employeeIdController.text.trim().isEmpty || 
+          _departmentController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill in all admin information')),
+          SnackBar(
+            content: Text('Please fill in all admin information'),
+            backgroundColor: error,
+          ),
         );
         return;
       }
     }
 
-    // TODO: Implement signup logic
-    debugPrint('Signing up as: $_selectedRole');
-    debugPrint('Name: ${_nameController.text}');
-    debugPrint('Age: ${_ageController.text}');
-    debugPrint('Email: ${_emailController.text}');
-    
-    if (_selectedRole == 'caretaker') {
-      debugPrint('Phone: ${_phoneController.text}');
-      debugPrint('Relationship: ${_relationshipController.text}');
-    }
-    
-    if (_selectedRole == 'admin') {
-      debugPrint('Employee ID: ${_employeeIdController.text}');
-      debugPrint('Department: ${_departmentController.text}');
-    }
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Navigate to appropriate screen after successful signup
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => VerificationScreen()));
+    try {
+      // Step 1: Create Firebase Auth account
+      UserCredential userCredential = await authService.value.createAccount(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      // Step 2: Update display name in Firebase Auth
+      await authService.value.updateUsername(
+        userName: _nameController.text.trim(),
+      );
+
+      // Step 3: Create user document in Realtime Database using DatabaseService
+      await databaseService.createUserDocument(
+        userId: userCredential.user!.uid,
+        name: _nameController.text.trim(),
+        age: age,
+        email: _emailController.text.trim(),
+        role: _selectedRole,
+        phone: _selectedRole == 'caretaker' ? _phoneController.text.trim() : null,
+        relationship: _selectedRole == 'caretaker' 
+            ? _relationshipController.text.trim() 
+            : null,
+        employeeId: _selectedRole == 'admin' 
+            ? _employeeIdController.text.trim() 
+            : null,
+        department: _selectedRole == 'admin' 
+            ? _departmentController.text.trim() 
+            : null,
+      );
+
+      // Step 4: Log the signup activity
+      await databaseService.logActivity(
+        userId: userCredential.user!.uid,
+        action: 'account_created',
+        details: 'User signed up as $_selectedRole',
+      );
+
+      // Success!
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Account created successfully!'),
+            backgroundColor: success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        
+        // The AuthLayout will automatically detect the auth state change
+        // and navigate to the home screen
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'An error occurred';
+      
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'The password is too weak';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'An account already exists for this email';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email address';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Email/password accounts are not enabled';
+          break;
+        default:
+          errorMessage = e.message ?? 'Signup failed';
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }
