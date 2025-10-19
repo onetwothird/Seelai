@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:seelai/themes/constants.dart';
 import 'package:seelai/themes/widgets.dart';
 import 'package:seelai/screens/signup_screen.dart';
+import 'package:seelai/mobile/auth_service.dart';
+import 'package:seelai/mobile/database_service.dart';
+import 'package:seelai/mobile/loading_overlay.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   String _selectedRole = 'visually_impaired';
   bool _obscurePassword = true;
+  bool _isLoading = false;
   
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -68,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Gradient background (back layer)
+          // Background gradient
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -84,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
           ),
 
-            // Background decorative images - Top Left
+          // Background decorative images
           Positioned(
             top: -90,
             left: -30,
@@ -92,14 +97,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_3.png',
-                width: 200, // Fixed width
-                height: 200, // Fixed height
+                width: 200,
+                height: 200,
                 fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // Background decorative images - Bottom Right
           Positioned(
             bottom: -60,
             right: -60,
@@ -107,14 +111,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               opacity: 0.8,
               child: Image.asset(
                 'assets/images/bg_shape_1.png',
-                width: 200, // Fixed width
-                height: 200, // Fixed height
+                width: 200,
+                height: 200,
                 fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // 4. Main content (front layer)
+          // Main content
           SafeArea(
             child: SingleChildScrollView(
               physics: BouncingScrollPhysics(),
@@ -210,6 +214,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           child: TextField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
+                            enabled: !_isLoading,
                             style: body.copyWith(
                               fontSize: 16,
                               color: black,
@@ -259,6 +264,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           child: TextField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
+                            enabled: !_isLoading,
                             style: body.copyWith(
                               fontSize: 16,
                               color: black,
@@ -317,8 +323,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {
-                              // TODO: Implement forgot password
+                            onPressed: _isLoading ? null : () {
+                              _showForgotPasswordDialog();
                             },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -339,9 +345,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         // Login Button
                         CustomButton(
                           text: "Sign In",
-                          onPressed: () {
-                            _handleLogin();
-                          },
+                          onPressed: _isLoading ? null : _handleLogin,
                           isLarge: true,
                         ),
 
@@ -350,7 +354,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         // Create account text
                         Center(
                           child: TextButton(
-                            onPressed: () {
+                            onPressed: _isLoading ? null : () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -455,6 +459,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
           ),
+
+          // Loading Overlay
+          if (_isLoading)
+            LoadingOverlay(
+              message: 'Signing In',
+              isVisible: _isLoading,
+            ),
         ],
       ),
     );
@@ -469,7 +480,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final isSelected = _selectedRole == role;
     
     return GestureDetector(
-      onTap: () {
+      onTap: _isLoading ? null : () {
         setState(() {
           _selectedRole = role;
         });
@@ -530,8 +541,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   Widget _buildSocialButton(String assetPath, Color brandColor) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Implement social login
+      onTap: _isLoading ? null : () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Social login coming soon!'),
+            backgroundColor: primary,
+          ),
+        );
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 250),
@@ -557,7 +573,68 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
-  void _handleLogin() {
+  void _showForgotPasswordDialog() {
+    final TextEditingController emailController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Reset Password'),
+        content: TextField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+            hintText: 'Enter your email',
+            prefixIcon: Icon(Icons.email_outlined),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (emailController.text.isEmpty) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Please enter your email'),
+                    backgroundColor: error,
+                  ),
+                );
+                return;
+              }
+              
+              try {
+                await authService.value.sendPasswordResetEmail(
+                  email: emailController.text.trim(),
+                );
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Password reset email sent!'),
+                    backgroundColor: success,
+                  ),
+                );
+              } catch (e) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error: ${e.toString()}'),
+                    backgroundColor: error,
+                  ),
+                );
+              }
+            },
+            child: Text('Send'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleLogin() async {
     // Validate fields
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -580,19 +657,90 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       return;
     }
 
-    // TODO: Implement actual login logic with backend
-    debugPrint('Logging in as: $_selectedRole');
-    debugPrint('Email: ${_emailController.text}');
-    
-    // Show success message (temporary)
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Login successful! Role: $_selectedRole'),
-        backgroundColor: success,
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Navigate to appropriate screen based on role after successful login
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+    try {
+      // Sign in with Firebase
+      UserCredential userCredential = await authService.value.signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      // Verify user exists in database
+      Map<String, dynamic>? userData = await databaseService.getUserData(userCredential.user!.uid);
+      
+      if (userData != null) {
+        // Verify role matches
+        String userRole = userData['role'] ?? '';
+        
+        // Log login activity
+        await databaseService.logActivity(
+          userId: userCredential.user!.uid,
+          action: 'login',
+          details: 'User logged in as $userRole',
+        );
+        
+        debugPrint('Logged in as: $userRole');
+        debugPrint('Selected role: $_selectedRole');
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Welcome back! Role: $userRole'),
+              backgroundColor: success,
+            ),
+          );
+        }
+      }
+      
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'An error occurred';
+      
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Wrong password';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email address';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This account has been disabled';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many attempts. Please try again later';
+          break;
+        default:
+          errorMessage = e.message ?? 'Login failed';
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }
